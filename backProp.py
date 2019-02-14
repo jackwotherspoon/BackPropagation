@@ -8,4 +8,7 @@ import numpy as np
 #read data
 columns=['Refractive_Index','Sodium','Magnesium','Aluminum','Silicon','Potassium','Calcium','Barium','Iron','Glass_Type']
 data=pd.read_csv('GlassData.csv', names=columns)
-print(data)
+X_data=data.drop('Glass_Type',axis=1)
+Y_data=data['Glass_Type']
+print(X_data)
+print(Y_data)

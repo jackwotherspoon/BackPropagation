@@ -5,7 +5,7 @@
 import pandas as pd
 import numpy as np
 import random
-import math
+from math import exp
 
 #read data
 columns=['Refractive_Index','Sodium','Magnesium','Aluminum','Silicon','Potassium','Calcium','Barium','Iron','Glass_Type']
@@ -39,6 +39,16 @@ def activate(weights, inputs):
 
 # Transfer neuron activation using sigmoid function
 def transfer(activation):
-    return 1.0 / (1.0 + math.exp(-activation))
+    return 1.0 / (1.0 + exp(-activation))
 
-
+# Forward propagate input to a network output
+def forward_propagate(network, row):
+    inputs = row
+    for layer in network:
+        new_inputs = []
+        for neuron in layer:
+            activation = activate(neuron['weights'], inputs)
+            neuron['output'] = transfer(activation)
+            new_inputs.append(neuron['output'])
+        inputs = new_inputs
+    return inputs

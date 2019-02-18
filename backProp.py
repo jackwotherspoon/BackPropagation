@@ -2,24 +2,11 @@
 # Created: February 10th, 2019
 
 #import dependencies
-import pandas as pd
-import numpy as np
 from random import seed
 from random import randrange
 from random import random
 from csv import reader
 from math import exp
-
-#read data
-#columns=['Refractive_Index','Sodium','Magnesium','Aluminum','Silicon','Potassium','Calcium','Barium','Iron','Glass_Type']
-#data=pd.read_csv('GlassData.csv', names=columns)
-#X_data=data.drop('Glass_Type',axis=1)
-#Y_data=data['Glass_Type']
-#sizeInputs=np.size(X_data,1)
-
-#get data values
-#X_values=X_data.values
-#Y_values=Y_data.values
 
 # Load a CSV file
 def load_csv(filename):
@@ -195,7 +182,7 @@ def back_propagation(train, test, l_rate, n_epoch, n_hidden):
     return(predictions)
 
 # Test Backprop on glass dataset
-#seed(3)
+seed(1)
 # load and prepare data
 filename = 'GlassData.csv'
 dataset= load_csv(filename)

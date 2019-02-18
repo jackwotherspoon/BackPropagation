@@ -166,6 +166,7 @@ def train_network(network, train, l_rate, n_epoch, n_outputs):
             expected[row[-1]] = 1
             backward_propagate_error(network, expected)
             update_weights(network, row, l_rate)
+        print(network)
 
 # Initialize a network
 def initialize_network(n_inputs, n_hidden, n_outputs):
@@ -194,7 +195,7 @@ def back_propagation(train, test, l_rate, n_epoch, n_hidden):
     return(predictions)
 
 # Test Backprop on glass dataset
-seed(1)
+#seed(3)
 # load and prepare data
 filename = 'GlassData.csv'
 dataset= load_csv(filename)

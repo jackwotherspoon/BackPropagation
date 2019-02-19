@@ -8,6 +8,9 @@ from random import random
 from csv import reader
 from math import exp
 
+#set to true when we want to write to output file
+outFile=False
+
 # Load a CSV file
 def load_csv(filename):
     dataset = list()
@@ -153,7 +156,6 @@ def train_network(network, train, l_rate, n_epoch, n_outputs):
             expected[row[-1]] = 1
             backward_propagate_error(network, expected)
             update_weights(network, row, l_rate)
-        print(network)
 
 # Initialize a network
 def initialize_network(n_inputs, n_hidden, n_outputs):
@@ -162,6 +164,10 @@ def initialize_network(n_inputs, n_hidden, n_outputs):
     network.append(hidden_layer)
     output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]
     network.append(output_layer)
+    if outFile:
+        f = open('Assignment2_Output.txt', 'w')
+        f.write("\n\nInitial Weights:\n")
+        f.write(str(network))
     return network
 
 # Make a prediction with a network
@@ -181,7 +187,7 @@ def back_propagation(train, test, l_rate, n_epoch, n_hidden):
         predictions.append(prediction)
     return(predictions)
 
-# Test Backprop on glass dataset
+# Run Backprop on glass dataset
 seed(1)
 # load and prepare data
 filename = 'GlassData.csv'
@@ -198,6 +204,12 @@ n_folds = 5
 l_rate = 0.9
 n_epoch = 500
 n_hidden = 7
+
+#create output file for Assignment 2:
+if outFile:
+    f=open('Assignment2_Output.txt','w')
+    f.write("\n\nInitial Weights:\n")
+    f.write
 scores = evaluate_algorithm(dataset, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
 print('Scores: %s' % scores)
 print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))

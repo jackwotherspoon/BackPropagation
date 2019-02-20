@@ -204,12 +204,12 @@ n_folds = 5
 l_rate = 0.9
 n_epoch = 500
 n_hidden = 7
-
-#create output file for Assignment 2:
-if outFile:
-    f=open('Assignment2_Output.txt','w')
-    f.write("\n\nInitial Weights:\n")
-    f.write
+momentum=0.9 #figure what to do with momentum
 scores = evaluate_algorithm(dataset, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
 print('Scores: %s' % scores)
 print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))
+#create output file for Assignment 2:
+if outFile:
+    f=open('Assignment2_Output.txt','w')
+    f.write('\nMean Accuracy: %.3f%%\n' % (sum(scores)/float(len(scores))))
+    f.write("Number of Nodes Used: \n")

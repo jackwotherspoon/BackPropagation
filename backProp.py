@@ -51,7 +51,7 @@ def normalize_dataset(dataset, minmax):
             row[i] = (row[i] - minmax[i][0]) / (minmax[i][1] - minmax[i][0])
 
 # Split a dataset into k folds
-def cross_validation_split(dataset, n_folds):
+def split_data(dataset, n_folds):
     dataset_split = list()
     dataset_copy = list(dataset)
     fold_size = int(len(dataset) / n_folds)
@@ -73,7 +73,7 @@ def accuracy_metric(actual, predicted):
 
 # Evaluate an algorithm using a cross validation split
 def evaluate_algorithm(dataset, algorithm, n_folds, *args):
-    folds = cross_validation_split(dataset, n_folds)
+    folds = split_data(dataset, n_folds)
     scores = list()
     for fold in folds:
         train_set = list(folds)

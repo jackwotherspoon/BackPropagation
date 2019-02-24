@@ -200,11 +200,11 @@ str_column_to_int(dataset, len(dataset[0])-1)
 minmax = dataset_minmax(dataset)
 normalize_dataset(dataset, minmax)
 # evaluate algorithm
-n_folds = 5
-l_rate = 0.9
+n_folds = 3
+l_rate = 0.5
 n_epoch = 500
 n_hidden = 7
-momentum=0.9 #figure what to do with momentum
+momentum = 0.9 #figure what to do with momentum
 scores = evaluate_algorithm(dataset, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
 print('Scores: %s' % scores)
 print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))
@@ -213,3 +213,6 @@ if outFile:
     f=open('Assignment2_Output.txt','w')
     f.write('\nMean Accuracy: %.3f%%\n' % (sum(scores)/float(len(scores))))
     f.write("Number of Nodes Used: \n")
+    f.write("Momentum Parameter Used: "+ str(momentum) +".\n")
+    f.write("Regularization Approach Used: \n")
+    f.write("Data Preprocessing: \n")

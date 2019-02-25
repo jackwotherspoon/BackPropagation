@@ -85,9 +85,11 @@ def accuracy_metric(actual, predicted):
 def evaluate_algorithm(dataset, algorithm,*args):
     train_set, validate_set, test_set = split_data(dataset)
     scores = list()
-    for i in train_set:
+    for i in range(2):
         predicted = algorithm(train_set, test_set, *args)
+        print(predicted)
         actual = [row[-1] for row in train_set]
+        print(actual)
         accuracy = accuracy_metric(actual, predicted)
         scores.append(accuracy)
     return scores
@@ -184,10 +186,10 @@ def back_propagation(train, test, l_rate, n_epoch, n_hidden):
     network = initialize_network(n_inputs, n_hidden, n_outputs)
     train_network(network, train, l_rate, n_epoch, n_outputs)
     predictions = list()
-    for row in test:
+    for row in train:
         prediction = predict(network, row)
         predictions.append(prediction)
-    return(predictions)
+    return predictions
 
 # Run Backprop on glass dataset
 seed(1)
@@ -202,16 +204,13 @@ str_column_to_int(dataset, len(dataset[0])-1)
 minmax = dataset_minmax(dataset)
 normalize_dataset(dataset, minmax)
 # evaluate algorithm
-n_folds = 3
 l_rate = 0.5
-n_epoch = 500
+n_epoch = 10
 n_hidden = 7
 momentum = 0.9 #figure what to do with momentum
 
-train,validate,test=split_data(dataset)
-
 scores = evaluate_algorithm(dataset, back_propagation, l_rate, n_epoch, n_hidden)
-#print('Scores: %s' % scores)
+print('Scores: %s' % scores)
 #print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))
 #create output file for Assignment 2:
 if outFile:

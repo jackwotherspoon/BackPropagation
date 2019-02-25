@@ -52,22 +52,26 @@ def normalize_dataset(dataset, minmax):
 
 # Split a dataset into k folds
 def split_data(dataset):
-    dataset_split = list()
     dataset_copy = list(dataset)
+    #choosing sizes, split is 70% training, 15% validation, 15% test
     train_size=int(len(dataset) * 0.7)
     validation_size=int(len(dataset) * 0.15)
     test_size=int(len(dataset) * 0.15)
+    #initiliaze sets to empy
     train_data=list()
     validation_data=list()
     test_data=list()
-    set=list()
+    #randomly split data into data set, validation set and test set
     for i in range(train_size):
         index=randrange(len(dataset_copy))
-    while len(set) < (len(train_size)+len(validation_size)+len(test_size)):
+        train_data.append(dataset_copy.pop(index))
+    for i in range(validation_size):
         index = randrange(len(dataset_copy))
-        set.append(dataset_copy.pop(index))
-        dataset_split.append(set)
-    return dataset_split
+        validation_data.append(dataset_copy.pop(index))
+    for i in range(test_size):
+        index = randrange(len(dataset_copy))
+        test_data.append(dataset_copy.pop(index))
+    return train_data, validation_data, test_data
 
 # Calculate accuracy percentage
 def accuracy_metric(actual, predicted):
@@ -78,21 +82,12 @@ def accuracy_metric(actual, predicted):
     return correct / float(len(actual)) * 100.0
 
 # Evaluate an algorithm using a cross validation split
-def evaluate_algorithm(dataset, algorithm, n_folds, *args):
-    folds = split_data(dataset, n_folds)
-    print(folds)
+def evaluate_algorithm(dataset, algorithm,*args):
+    train_set, validate_set, test_set = split_data(dataset)
     scores = list()
-    for fold in folds:
-        train_set = list(folds)
-        train_set.remove(fold)
-        train_set = sum(train_set, [])
-        test_set = list()
-        for row in fold:
-            row_copy = list(row)
-            test_set.append(row_copy)
-            row_copy[-1] = None
+    for i in train_set:
         predicted = algorithm(train_set, test_set, *args)
-        actual = [row[-1] for row in fold]
+        actual = [row[-1] for row in train_set]
         accuracy = accuracy_metric(actual, predicted)
         scores.append(accuracy)
     return scores
@@ -213,9 +208,11 @@ n_epoch = 500
 n_hidden = 7
 momentum = 0.9 #figure what to do with momentum
 
-scores = evaluate_algorithm(dataset, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
-print('Scores: %s' % scores)
-print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))
+train,validate,test=split_data(dataset)
+
+scores = evaluate_algorithm(dataset, back_propagation, l_rate, n_epoch, n_hidden)
+#print('Scores: %s' % scores)
+#print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))
 #create output file for Assignment 2:
 if outFile:
     f=open('Assignment2_Output.txt','w')

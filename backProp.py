@@ -51,16 +51,22 @@ def normalize_dataset(dataset, minmax):
             row[i] = (row[i] - minmax[i][0]) / (minmax[i][1] - minmax[i][0])
 
 # Split a dataset into k folds
-def split_data(dataset, n_folds):
+def split_data(dataset):
     dataset_split = list()
     dataset_copy = list(dataset)
-    fold_size = int(len(dataset) / n_folds)
-    for i in range(n_folds):
-        fold = list()
-        while len(fold) < fold_size:
-            index = randrange(len(dataset_copy))
-            fold.append(dataset_copy.pop(index))
-        dataset_split.append(fold)
+    train_size=int(len(dataset) * 0.7)
+    validation_size=int(len(dataset) * 0.15)
+    test_size=int(len(dataset) * 0.15)
+    train_data=list()
+    validation_data=list()
+    test_data=list()
+    set=list()
+    for i in range(train_size):
+        index=randrange(len(dataset_copy))
+    while len(set) < (len(train_size)+len(validation_size)+len(test_size)):
+        index = randrange(len(dataset_copy))
+        set.append(dataset_copy.pop(index))
+        dataset_split.append(set)
     return dataset_split
 
 # Calculate accuracy percentage
@@ -74,6 +80,7 @@ def accuracy_metric(actual, predicted):
 # Evaluate an algorithm using a cross validation split
 def evaluate_algorithm(dataset, algorithm, n_folds, *args):
     folds = split_data(dataset, n_folds)
+    print(folds)
     scores = list()
     for fold in folds:
         train_set = list(folds)
@@ -205,6 +212,7 @@ l_rate = 0.5
 n_epoch = 500
 n_hidden = 7
 momentum = 0.9 #figure what to do with momentum
+
 scores = evaluate_algorithm(dataset, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
 print('Scores: %s' % scores)
 print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))

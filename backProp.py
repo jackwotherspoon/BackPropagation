@@ -85,13 +85,12 @@ def accuracy_metric(actual, predicted):
 def evaluate_algorithm(dataset, algorithm,*args):
     train_set, validate_set, test_set = split_data(dataset)
     scores = list()
-    for i in range(2):
-        predicted = algorithm(train_set, test_set, *args)
-        print(predicted)
-        actual = [row[-1] for row in train_set]
-        print(actual)
-        accuracy = accuracy_metric(actual, predicted)
-        scores.append(accuracy)
+    predicted = algorithm(train_set,validate_set, test_set, *args)
+    #print(predicted)
+    actual = [row[-1] for row in validate_set]
+    #print(actual)
+    accuracy = accuracy_metric(actual, predicted)
+    scores.append(accuracy)
     return scores
 
 # Calculate neuron activation for an input
@@ -154,13 +153,15 @@ def update_weights(network, row, l_rate):
 # Train a network for a fixed number of epochs
 def train_network(network, train, l_rate, n_epoch, n_outputs):
     for epoch in range(n_epoch):
+        sum_error=0
         for row in train:
             outputs = forward_propagate(network, row)
             expected = [0 for i in range(n_outputs)]
             expected[row[-1]] = 1
+            sum_error += sum([(expected[i] - outputs[i]) ** 2 for i in range(len(expected))])
             backward_propagate_error(network, expected)
             update_weights(network, row, l_rate)
-
+        #print('>epoch=%d, lrate=%.3f, error=%.3f' % (epoch, l_rate, sum_error))
 # Initialize a network
 def initialize_network(n_inputs, n_hidden, n_outputs):
     network = list()
@@ -180,13 +181,13 @@ def predict(network, row):
     return outputs.index(max(outputs))
 
 # Backpropagation Algorithm With Stochastic Gradient Descent
-def back_propagation(train, test, l_rate, n_epoch, n_hidden):
+def back_propagation(train,validate, test, l_rate, n_epoch, n_hidden):
     n_inputs = len(train[0]) - 1
     n_outputs = len(set([row[-1] for row in train]))
     network = initialize_network(n_inputs, n_hidden, n_outputs)
     train_network(network, train, l_rate, n_epoch, n_outputs)
     predictions = list()
-    for row in train:
+    for row in validate:
         prediction = predict(network, row)
         predictions.append(prediction)
     return predictions
@@ -204,14 +205,14 @@ str_column_to_int(dataset, len(dataset[0])-1)
 minmax = dataset_minmax(dataset)
 normalize_dataset(dataset, minmax)
 # evaluate algorithm
-l_rate = 0.5
-n_epoch = 10
+l_rate = 0.7
+n_epoch = 500
 n_hidden = 7
 momentum = 0.9 #figure what to do with momentum
 
 scores = evaluate_algorithm(dataset, back_propagation, l_rate, n_epoch, n_hidden)
 print('Scores: %s' % scores)
-#print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))
+print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))
 #create output file for Assignment 2:
 if outFile:
     f=open('Assignment2_Output.txt','w')

@@ -147,12 +147,13 @@ def update_weights(network, row, l_rate):
             inputs = [neuron['output'] for neuron in network[i - 1]]
         for neuron in network[i]:
             for j in range(len(inputs)):
-                neuron['weights'][j] += (l_rate * neuron['delta'] * inputs[j])+ (0.9 * previous_weight)
+                neuron['weights'][j] += (l_rate * neuron['delta'] * inputs[j])
                 previous_weight = neuron['weights'][j]
             neuron['weights'][-1] += l_rate * neuron['delta']
 
 # Train a network for a fixed number of epochs
-def train_network(network, train, l_rate, n_epoch, n_outputs):
+def train_network(network, train,validate, l_rate, n_epoch, n_outputs):
+    errors=list()
     for epoch in range(n_epoch):
         sum_error=0
         for row in train:
@@ -162,6 +163,10 @@ def train_network(network, train, l_rate, n_epoch, n_outputs):
             sum_error += sum([(expected[i] - outputs[i]) ** 2 for i in range(len(expected))])
             backward_propagate_error(network, expected)
             update_weights(network, row, l_rate)
+        errors.append(sum_error)
+        if epoch > 2 and(errors[epoch-1] - errors[epoch] < 0.01):
+            print("Terminated training to avoid overfitting at epoch %d" % epoch)
+            break
         #print('>epoch=%d, lrate=%.3f, error=%.3f' % (epoch, l_rate, sum_error))
 
 # Make a prediction with a network
@@ -170,11 +175,11 @@ def predict(network, row):
     return outputs.index(max(outputs))
 
 # Backpropagation Algorithm With Stochastic Gradient Descent
-def back_propagation(train,validate, test, l_rate, n_epoch, n_hidden):
+def back_propagation(train,validate, l_rate, n_epoch, n_hidden):
     n_inputs = len(train[0]) - 1
     n_outputs = len(set([row[-1] for row in train]))
     network = initialize_network(n_inputs, n_hidden, n_outputs)
-    train_network(network, train, l_rate, n_epoch, n_outputs)
+    train_network(network, train,validate, l_rate, n_epoch, n_outputs)
     predictions = list()
     for row in validate:
         prediction = predict(network, row)
@@ -190,10 +195,10 @@ def testing(test,network):
     return predictions
 
 # Evaluate an algorithm on training set, validation and test set
-def evaluate_algorithm(dataset, algorithm,*args):
+def evaluate_algorithm(dataset, algorithm,l_rate,n_epoch,n_hidden):
     train_set, validate_set, test_set = split_data(dataset)
     scores = list()
-    predicted, network = algorithm(train_set,validate_set, test_set, *args)
+    predicted, network = algorithm(train_set,validate_set, l_rate,n_epoch,n_hidden)
     #print(predicted)
     actual = [row[-1] for row in validate_set]
     #print(actual)
@@ -219,7 +224,7 @@ minmax = dataset_minmax(dataset)
 normalize_dataset(dataset, minmax)
 # evaluate algorithm
 l_rate = 0.7
-n_epoch = 500
+n_epoch = 1000
 n_hidden = 7
 momentum = 0.9 #figure what to do with momentum
 

@@ -1,8 +1,7 @@
 # Author: Jack Wotherspoon
-# Student Number: 20012060
 # Created: February 10th, 2019
 
-#import dependencies
+#import dependencies as well as numpy and pandas
 from random import seed
 from random import randrange
 from random import random
@@ -10,9 +9,6 @@ from csv import reader
 from math import exp
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
-
-#set to true when we want to write to output file
-outFile=False
 
 # Load a CSV file
 def load_csv(filename):
@@ -60,21 +56,7 @@ def initialize_network(n_inputs, n_hidden, n_outputs):
     network.append(hidden_layer)
     output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]  #add random weight between 0-1 for number of inputs nodes +1 for bias, loop for number of output nodes so all hidden nodes are connected to all output nodes
     network.append(output_layer)
-    #write structural data to output file
-    if outFile:
-        f.write("\nStructure of network is (%d,%d,%d)" % (n_inputs,n_hidden,n_outputs))
-        f.write("\nAs seen 9 input nodes were used, one for each feature given in CSV file.\n")
-        f.write("The number of hidden layers is 1 and it has 8 hidden nodes. \n")
-        f.write("Only one hidden layer was chosen through trial and error of viewing accuracy on validation set when changing number of layers. Adding a second layer slightly increased accuracy but greatly increased computation and thus was rejected.")
-        f.write("\nThe 8 hidden nodes was determined through same trial and error of viewing accuracy on validation set. The 8 nodes gave best results.")
-        f.write("\nThere are 6 output nodes, this was chosen due to the number of glass types given which is 6.\n")
-        f.write("\nInitial Weights:\n")
-        f.write("Input to hidden layer weights:" +str(hidden_layer)+"\n")
-        f.write("Hidden to output layer weights:" +str(output_layer))
-        f.write("\n\nNode Output Function Used: ")
-        f.write("\nOutput node function used for this assignment is sigmoid function as it allows for a smooth and bounded function for the total input. It also has the added benefit of having nice derivatives which make learning the weights of a neural network easier.")
     return network
-
 # Split a dataset into training,validation and test sets
 def split_data(dataset):
     dataset_copy = list(dataset)
@@ -215,8 +197,10 @@ def evaluate_algorithm(dataset, algorithm,l_rate,momentum,n_epoch,n_hidden):
     accuracy = accuracy_metric(actual, predicted)   #compute accuracy of validation set
     scores.append(accuracy)
     predicted_test=testing(test_set,network)     #predict test set classes
+    print("Predicted Classes: ")
     print(predicted_test)
     actual_test=[row[-1] for row in test_set]   #grab actual test set classes
+    print("Actual Classes: ")
     print(actual_test)
     accuracy_test=accuracy_metric(actual_test,predicted_test) #accuracy of test set predictions
     scores.append(accuracy_test)
@@ -239,13 +223,7 @@ l_rate = 0.2
 n_epoch = 1000
 n_hidden = 8
 momentum = 0.9
-
-#create output file and write to it
-if outFile:
-    f=open('Assignment2_Output.txt','w')
-    f.write("Assignment 2 Output File \n")
-    f.write("\nStudent: Jack Wotherspoon \n")
-    f.write("Student Number: 20012060 \n")
+#evaluate algorithm
 scores,network,actual,predicted= evaluate_algorithm(dataset, back_propagation, l_rate,momentum, n_epoch, n_hidden)
 print('Validation set Accuracy: %s'% scores[0])
 print('Test set Accuracy: %s' % scores[1])
@@ -258,36 +236,3 @@ print(confusion_mat)
 class_report=classification_report(actual,predicted)
 print("Precision and Recall")
 print(class_report)
-#write assignment requirements to file
-if outFile:
-    f.write("\n\nLearning rate: %.1f" % l_rate)
-    f.write("\nLearning rate was chosen to be 0.2 by using it as a parameter for my validation testing. Through many trials and iterations it was determined to be the best for accuracy. ")
-    f.write("\n\nTerminating Critera: ")
-    f.write("\nTerminating criteria is one of two things. Training stops when the 1000 epochs are completed or when sum-squared error on training data begins to change super slowly. ")
-    f.write("\nThe number of epochs was used as a parameter for validation set, 1000 was determined to be the cutoff as to where increasing the number of epochs seeemed to no longer improve accuracy by a noticeable amount.")
-    f.write("\nSum-squared error is checked each epoch and if the change in error from one epoch to the next is less than 0.01 than it stops training. This was a parameter for validation testing and was determined through trials and iterations.")
-    f.write("\nThis terminating criteria allows the training to not overfit the data by stopping it once it has learned sufficiently.")
-    f.write("\n\nMomentum value: %.1f" % momentum)
-    f.write("\nThis momentum value was determined through using it as a validation parameter. It allowed my training accuracy to go from 65% to roughly 80% on my training data, probably escaping a local minima. This then transfered to a better validation accuracy. ")
-    f.write("\n\nData Preprocessing:")
-    f.write("\nThe first part of my preprocessing was to convert the CSV input data from strings to floats and the class column from string to integer. This allows for much easier usage of the data further along.")
-    f.write("\nThe main preprocessing I did was normalizing the data. Since the raw data for features vary in scale, some are in range 0-1 and some as high as being in the seventies. This would cause the feature with values in the seventies to alter the node outputs way more than the others.")
-    f.write("\n Normalizing the data fixes this. I normalized my data into the range of 0-1 as it is good practice to normalize input values to the range of the transfer function which is sigmoid and outputs between 0-1.")
-    f.write("\n\nData Splitting")
-    f.write("\nAs seen in my split_data() function I chose to split my data into 70% training data, 15% validation data, and 15% testing data.")
-    f.write("\nI chose these splits because you always want the majority of data to be in the training set where it can learn and update weights and biases.")
-    f.write("\nMy validation set was given 15% in order to allow me to tune parameters of my network. Using my validation set I was able to tune my number of hidden layers and nodes, learning rate, number of epochs, and terminating criteria and improve validation accuracy with each.")
-    f.write("\nThe remaining 15% was for the test set which allowed for an unbiased evaluation of the final model. Only used once the validation set was sufficiently trained (using training and validation set).")
-    f.write("\n\nFinal Weight Vectors:\n")
-    f.write(str(network))
-    f.write("\nIgnore output and delta part of dictionaries for weights as those were used earlier in code.")
-    f.write("\n\nActual Classes: \n")
-    f.write(str(actual))
-    f.write("\n\nPredicted Classes: \n")
-    f.write(str(predicted))
-    f.write("\nTest set Accuracy: %s" % scores[1]+"%")
-    f.write("\n\nConfusion Matrix:\n")
-    f.write(str(confusion_mat))
-    f.write("\n\nPrecision and Recall: \n")
-    f.write(str(class_report))
-    f.close()

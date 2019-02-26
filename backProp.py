@@ -49,6 +49,18 @@ def normalize_dataset(dataset, minmax):
     for row in dataset:
         for i in range(len(row)-1):
             row[i] = (row[i] - minmax[i][0]) / (minmax[i][1] - minmax[i][0])
+# Initialize a network
+def initialize_network(n_inputs, n_hidden, n_outputs):
+    network = list()
+    hidden_layer = [{'weights':[random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
+    network.append(hidden_layer)
+    output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]
+    network.append(output_layer)
+    if outFile:
+        f = open('Assignment2_Output.txt', 'w')
+        f.write("\n\nInitial Weights:\n")
+        f.write(str(network))
+    return network
 
 # Split a dataset into k folds
 def split_data(dataset):
@@ -80,18 +92,6 @@ def accuracy_metric(actual, predicted):
         if actual[i] == predicted[i]:
             correct += 1
     return correct / float(len(actual)) * 100.0
-
-# Evaluate an algorithm using a cross validation split
-def evaluate_algorithm(dataset, algorithm,*args):
-    train_set, validate_set, test_set = split_data(dataset)
-    scores = list()
-    predicted = algorithm(train_set,validate_set, test_set, *args)
-    #print(predicted)
-    actual = [row[-1] for row in validate_set]
-    #print(actual)
-    accuracy = accuracy_metric(actual, predicted)
-    scores.append(accuracy)
-    return scores
 
 # Calculate neuron activation for an input
 def activate(weights, inputs):
@@ -147,7 +147,8 @@ def update_weights(network, row, l_rate):
             inputs = [neuron['output'] for neuron in network[i - 1]]
         for neuron in network[i]:
             for j in range(len(inputs)):
-                neuron['weights'][j] += l_rate * neuron['delta'] * inputs[j]
+                neuron['weights'][j] += (l_rate * neuron['delta'] * inputs[j])+ (0.9 * previous_weight)
+                previous_weight = neuron['weights'][j]
             neuron['weights'][-1] += l_rate * neuron['delta']
 
 # Train a network for a fixed number of epochs
@@ -162,18 +163,6 @@ def train_network(network, train, l_rate, n_epoch, n_outputs):
             backward_propagate_error(network, expected)
             update_weights(network, row, l_rate)
         #print('>epoch=%d, lrate=%.3f, error=%.3f' % (epoch, l_rate, sum_error))
-# Initialize a network
-def initialize_network(n_inputs, n_hidden, n_outputs):
-    network = list()
-    hidden_layer = [{'weights':[random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
-    network.append(hidden_layer)
-    output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]
-    network.append(output_layer)
-    if outFile:
-        f = open('Assignment2_Output.txt', 'w')
-        f.write("\n\nInitial Weights:\n")
-        f.write(str(network))
-    return network
 
 # Make a prediction with a network
 def predict(network, row):
@@ -190,10 +179,34 @@ def back_propagation(train,validate, test, l_rate, n_epoch, n_hidden):
     for row in validate:
         prediction = predict(network, row)
         predictions.append(prediction)
+    return predictions, network
+
+#function that predicts class for test set
+def testing(test,network):
+    predictions = list()
+    for row in test:
+        prediction = predict(network, row)
+        predictions.append(prediction)
     return predictions
 
+# Evaluate an algorithm on training set, validation and test set
+def evaluate_algorithm(dataset, algorithm,*args):
+    train_set, validate_set, test_set = split_data(dataset)
+    scores = list()
+    predicted, network = algorithm(train_set,validate_set, test_set, *args)
+    #print(predicted)
+    actual = [row[-1] for row in validate_set]
+    #print(actual)
+    accuracy = accuracy_metric(actual, predicted)
+    scores.append(accuracy)
+    predicted_test=testing(test_set,network)
+    actual_test=[row[-1] for row in test_set]
+    accuracy_test=accuracy_metric(actual_test,predicted_test)
+    scores.append(accuracy_test)
+    return scores
+
 # Run Backprop on glass dataset
-seed(1)
+#seed(1)
 # load and prepare data
 filename = 'GlassData.csv'
 dataset= load_csv(filename)
